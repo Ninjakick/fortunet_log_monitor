@@ -1,0 +1,58 @@
+doctype html
+html
+  head
+    title Tableau de bord
+    link(rel='stylesheet', href='/stylesheets/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/css/bootstrap-grid.css')
+    link(rel='stylesheet', href='/stylesheets/css/animate.css')
+    link(rel='stylesheet', href='/stylesheets/customstyle.css')
+    link(rel='stylesheet', href='/stylesheets/css/datetimepick.css')
+    link(href="https://fonts.googleapis.com/icon?family=Material+Icons",rel="stylesheet")
+    script(src='/javascripts/js/jquery-3.4.1.min.js')
+    script(src='/javascripts/js/bootstrap.min.js')
+    script(src='/javascripts/chart/Chart.js')
+    meta(charset="utf-8")
+    link(href="/images/icon.png",type="image/x-icon",rel="shortcut icon")
+    link(rel="stylesheet",type="text/css",href="/javascripts/angular/md-data-table.min.css")
+    link(rel="stylesheet",type="text/css",href="/javascripts/angular/angular-material.min.css")
+    script(type="text/javascript",src="/javascripts/angular/angular.js")
+    script(src="/javascripts/angular/angular-animate.min.js")
+    script(src="/javascripts/angular/angular-material.min.js")
+    script(type="text/javascript",src="/javascripts/angular/md-data-table.js")
+    script(type="text/javascript",src="/javascripts/angular/angular-aria.min.js")
+    script(src="/javascripts/angular/angular-highlightjs.min.js")
+    script(src="/javascripts/js/jquery.ajax-progress.js")
+    script(src="/javascripts/js/datetimepick.js")
+  body
+    div(class="wrapper")
+        nav(id="sidebar",style="height: 100vh; position: -webkit-sticky; position: sticky; top: 0;")
+            div(class="sidebar-header")
+                h3
+                    img(src="/images/Logonoire2.png", style="width: 100%")
+            ul(class="list-unstyled components")
+                li
+                    a(href="/users/tableaudebord")
+                        i(class="material-icons") home
+                        span Tableau de bord
+                li
+                    a(href="/users/importationpage")
+                        i(class="material-icons") table_chart
+                        span Importer log
+        div(class="modal",id="modalloading",tabindex="-1",role="dialog",style="pointer-events: none;")
+            div(class="modal-dialog",role="document",style="margin-top: 0px")
+                div(class="modal-content",style="background: unset; border: unset;")
+                    div(class="modal-body")
+                        div(class="sk-fading-circle")
+                        div(class="sk-circle1 sk-circle")
+                        div(class="sk-circle2 sk-circle")
+                        div(class="sk-circle3 sk-circle")
+                        div(class="sk-circle4 sk-circle")
+                        div(class="sk-circle5 sk-circle")
+                        div(class="sk-circle6 sk-circle")
+                        div(class="sk-circle7 sk-circle")
+                        div(class="sk-circle8 sk-circle")
+                        div(class="sk-circle9 sk-circle")
+                        div(class="sk-circle10 sk-circle")
+                        div(class="sk-circle11 sk-circle")
+                        div(class="sk-circle12 sk-circle")
+        block content

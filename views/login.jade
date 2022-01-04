@@ -1,0 +1,26 @@
+extends layout
+
+block content
+	header
+		nav(class="navbar navbar-expand-lg navbar-light bg-light h-25")
+			a(class="navbar-brand p-0 pl-5", href="")
+				img(src="/images/Logo-smartone.png", class="w-25")
+			a(class="navbar-brand navbar-nav pr-5 float-right", style="right: -20px;position: absolute;")
+	div(class="container")
+		div(class="myform")
+			div(class="col-4 offset-4 mt-5 card p-0")
+				div(class="card-header")
+					h4(class="text-center text-uppercase") Connexion
+					div(class="col-12 text-center")
+						span(class="text-danger") #{error}
+					form(action="/users/authentification", method="post", class="card-body")
+						div(class="form-group")
+							label(class="control-label") Matricule
+							input(type="text",name="user_name",class="form-control", required="true")
+						div(class="form-group")
+							label(class="control-label") Mot de passe
+							input(type="password",name="password",class="form-control", required="true")
+						div(class="form-group")
+							label(class="control-label")
+							button(class="btn btn-success btn-block")
+								Se connecter

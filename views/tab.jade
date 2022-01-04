@@ -1,0 +1,144 @@
+extends entete
+
+block content
+	div(class="container-fluid")
+		div(class="row")
+			main(class="page-content col-12 mt-4", ng-app="myApp", ng-controller="loaderchart")
+				div(class="container-fluid")
+				h2 TABLEAU DE BORD
+				hr
+				div(class="col-12 p-0")
+					div(class="card-header text-uppercase",style="background-color: #343A40; color: white;")
+						div(class="col-6") Consomation de donné
+					div(class="card-body")
+						div(class="col-12")
+							form(method="get", action="/users/filter")
+								div(class="row")
+									div(class="col-3")
+										label Rosage
+										input(class="form-control", name="srcname", type="text",required)
+									div(class="col-6")
+										div(class="row")
+											div(class="col")
+												label date
+												input(class="form-control", name="datedebut", required, type="text", id="dateini")
+											div(class="col")
+												label
+													br
+												input(class="form-control", name="datefin", required, type="text", id="datefini")
+									div(class="col-3")
+										label
+											br
+										button(class="btn btn-block btn-primary") Filtrer
+						div(id="canvasContainer", class="mt-4")
+
+	script.
+		$(document).ready(function(){
+			$("#dateini" ).datetimepicker({
+				format:'Y-m-d H:i',
+				lang:'fr',
+				theme:'dark'
+			});
+			$( "#datefini" ).datetimepicker({
+				format:'Y-m-d H:i',
+				lang:'fr',
+				theme:'dark'                   
+			});
+		});
+		var app = angular.module('myApp', ['ngMaterial', 'md.data.table']);
+		app.factory('donnesearch', function ($http, $q) {
+			var $factory = {
+				showshart: function(value, key){
+					var referred = $q.defer();
+					$http({
+						method: 'GET',
+						url: '/users/data?'+key+"="+value,
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					}).
+					then(function(datas){
+						referred.resolve(datas);
+					});
+					return referred.promise;
+				},
+			}
+			return $factory;
+		});
+		app.controller('loaderchart', ['$scope', '$http', '$q', '$filter', 'donnesearch', function ($scope, $http, $q, $filter, donnesearch) {
+			$scope.donne = [{srcname:"bpo-v-1", nom:"bpov1"},{srcname:"bpo-v-2", nom:"bpov2"},{srcname:"bpo-v-3", nom:"bpov3"},{srcname:"bpo-v-4", nom:"bpov4"},{srcname:"bpo-v-5", nom:"bpov5"},{srcname:"bpo-v-6", nom:"bpov6"},{srcname:"bpo-v-7", nom:"bpov7"},{srcname:"bpo-v-8", nom:"bpov8"},{srcname:"bpo-v-9", nom:"bpov9"},{srcname:"bpo-h-1", nom:"bpoh1"},{srcname:"bpo-h-2", nom:"bpoh2"},{srcname:"bpo-h-3", nom:"bpoh3"},{srcname:"bpo-h-4", nom:"bpoh4"},{srcname:"bpo-h-5", nom:"bpoh5"},{srcname:"bpo-h-6", nom:"bpoh6"},{srcname:"bpo-h-7", nom:"bpoh7"},{srcname:"bpo-h-8", nom:"bpoh8"}, {srcname:"call", nom:"call"}, {srcip: "172.16.95", nom:"direction"}, {srcip: "172.16.97", nom:"it"}];
+			$scope.modalload = function(value) {
+				if (value) {
+					$("#modalloading").modal("show");
+				}
+				else{
+					$("#modalloading").modal('hide');
+				}
+			};
+			for (var i = 0; i < $scope.donne.length; i++) {
+				var kb = Object.keys($scope.donne[i])[0];
+				var req = Object.values($scope.donne[i])[0];
+				$scope.modalload(true);
+				donnesearch.showshart(req, kb).then(function(datas) {
+					$scope.modalload(false);
+					$("#canvasContainer").append("<div class='col-12'><h5 class='text-center'><b>ROSAGE : "+datas.data.iq+"</b></h5><canvas id='"+datas.data.iq+"')</canvas></div>");
+					var canvas = document.getElementById(datas.data.iq);
+					var ctx = canvas.getContext('2d');
+					var myChart = new Chart(ctx, {
+						type: 'line',
+						data: {
+					   		labels: datas.data.label,
+							datasets: [{
+								label: 'Sortant',
+								data: datas.data.datasortant,
+								backgroundColor: "rgba(179, 11, 11,0.9)",
+								borderColor: "rgba(179, 11, 11,0.9)",
+								fill: false
+							},
+							{
+								label: 'Entrant',
+								data: datas.data.dataentrant,
+								backgroundColor: "rgba(0, 153, 148,0.9)",
+								borderColor: "rgba(0, 153, 148,0.9)",
+								fill:false
+							}]
+						},
+						options:{
+							responsive: true,
+							tooltips: {
+								mode: 'index',
+								intersect: false,
+							},
+							hover: {
+								mode: 'nearest',
+								intersect: true
+							},
+							title: {
+								display: true,
+								text: ""
+							},
+							scales: {
+								xAxes: [{
+									display: true,
+									scaleLabel: {
+										display: true,
+										labelString: 'Date'
+									}
+								}],
+								yAxes: [{
+									display: true,
+									scaleLabel: {
+										display: true,
+										labelString: 'Value (GB)'
+									}
+								}]
+							},
+							legend: {
+								display: true,
+								position: 'right',
+							},
+						}
+					});
+				})
+				
+			}
+		}]);		
+		

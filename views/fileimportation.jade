@@ -1,0 +1,160 @@
+extends progresstest
+block content
+	div(class="container-fluid")
+		div(class="row")
+			main(class="page-content col-12 mt-4")
+				div(class="modal fade",id="progressModal",tabindex="-1",role="dialog",aria-hidden="true")
+					div(class="modal-dialog",role="document")
+						div(class="modal-content")
+							div(class="modal-header")
+								h5(class="modal-title") Progression
+							div(class="modal-body")
+								div(class="progress",style="width: 100%;  height: 20px; margin-bottom: 2px;")
+									div(id="progression_upload",class="progress-bar progress-bar-striped progress-bar-animated",role="progressbar",aria-valuenow="0",aria-valuemin="0",aria-valuemax="100",style="width: 0%;height:100%; font-weight:bold; color:black")
+								div(class="col-12")
+									div(style="text-align: right;width: 80%;  height: 20px; margin-left: 10%;")
+										span(style="color:black;") Temps restant:
+										span(id="progression_upload_temp",style="color:black; margin-left: 10px;")
+							div(class="modal-footer")
+				div(class="container-fluid")
+				h2 Gestion des fichiers log Fortinet
+				hr
+				div(class="col-12 p-0")
+					div(class="card-header text-uppercase",style="background-color: #343A40; color: white;")
+						div(class="col-6") upload des fichier
+					div(class="card-body")
+						div(class="col-12")
+							div(class="row")
+								// form(method="post", action="/users/importation", enctype="multipart/form-data")
+								div(class="col-4")
+									label Fichier multiple
+									input(class="form-control", name="fichierlog", type='file', multiple)
+								div(class="col-2")
+									label
+										br
+									button(class="btn btn-block btn-success", onclick="showprogresssion()") Uploader
+				div(class="col-12 p-0")
+					div(class="card-header text-uppercase",style="background-color: #343A40; color: white;")
+						div(class="col-6") Liste des fichier
+					div(class="card-body", ng-app="myApp")
+						div(class="col-12", ng-controller="loaderfile")
+							md-table-container
+								table(class="table table-bordered table-striped",md-table)
+									thead(md-head,md-order="query.order")
+										tr(md-row)
+											th( md-column, md-order-by="filename", class="text-center") Nom de fichier
+											th( md-column, md-order-by="nombre_line", class="text-center") Nombre de ligne
+											th( md-column, md-order-by="log_debut", class="text-center") Donne debut
+											th( md-column, md-order-by="log_fin", class="text-center") Donne Fin
+											th( md-column, md-order-by="date_importation", class="text-center") Date importation
+											th( md-column, class="text-center") Uploader par
+									tbody(md-body)
+										tr(ng-repeat="file in listfile  | orderBy: query.order | limitTo: query.limit: (query.page - 1) * query.limit", md-row)
+											td(md-cell, class="text-center") {{file.filename}}
+											td(md-cell, class="text-center") {{file.nombre_line}}
+											td(md-cell, class="text-center") {{affdate(file.log_debut)}}
+											td(md-cell, class="text-center") {{affdate(file.log_fin)}}
+											td(md-cell, class="text-center") {{affdate(file.date_importation)}}
+											td(md-cell, class="text-center") {{file.user_name}}
+							md-table-pagination(md-limit="query.limit",md-limit-options="[15, 30, 50, 100]",md-page="query.page",md-total="{{listfile.length}}",md-label="{page: 'Page:', rowsPerPage: 'Ligne par page:', of: 'de'}",md-page-select)
+	script.
+		function showprogresssion(){
+			$("#progressModal").modal("show")
+			$("#progressModal").css("pointer-events","none");
+			var data = new FormData();
+			var file_data = $('input[name="fichierlog"]')[0].files;
+			for (var i = 0; i < file_data.length; i++) {
+				data.append("fichierlog[]", file_data[i]);
+			}
+			var started_at = new Date();
+			$.ajax({
+				url : "/users/importation",
+				type : "POST",
+				data:  data,
+				contentType: false,
+				cache: false,
+				processData:false,
+				success: function(data)        
+				{ 
+					location.reload()
+				},
+				error: function (jqXHR, textStatus, errorThrown)
+				{ 
+					console.log(jqXHR, textStatus, errorThrown)
+				},
+				progress: function(e) {
+					if(e.lengthComputable) {
+						var pct = (e.loaded / e.total) * 100;
+						var loaded = e.loaded;
+						var total = e.total;
+						$('#progression_upload').css("width", pct.toFixed(0)+"%");
+						$('#progression_upload').attr("aria-valuenow", pct.toFixed(0));
+						$('#progression_upload').text(pct.toFixed(0)+"%");
+						if (pct.toFixed(0) == 100) {
+							location.reload()
+						}
+						var seconds_elapsed =   ( new Date().getTime() - started_at.getTime() )/1000;
+						var bytes_per_second =  seconds_elapsed ? loaded / seconds_elapsed : 0 ;
+						var Kbytes_per_second = bytes_per_second / 1000 ;
+						var remaining_bytes =   total - loaded;
+						var seconds_remaining = seconds_elapsed ? remaining_bytes / bytes_per_second : 'calculating';
+						$('#progression_upload_temp').text(new Date(seconds_remaining.toFixed(0) * 1000).toISOString().substr(11, 8));
+					}
+					else {
+						console.warn('Content Length not reported!');
+					}
+				}
+			});
+		}
+		var app = angular.module('myApp', ['ngMaterial', 'md.data.table']);
+		app.factory('donnesearch', function ($http, $q) {
+			var $factory = {
+				showshart: function (id) {
+					var deferred = $q.defer();
+					$http({ 
+						method: 'GET',
+						url: 'index.php/Fichier/getstatfile/'+id,
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+					}).then(function (datas) {
+						deferred.resolve(datas);
+					});
+					return deferred.promise;
+				},
+			}
+			return $factory;
+		});
+		app.controller('loaderfile', ['$scope', '$http', '$q', '$filter', 'donnesearch', function ($scope, $http, $q, $filter, donnesearch) {
+			var kb = '#{filelist}';
+			$scope.listfile = JSON.parse(kb.replace(/&quot;/g, '"'));
+			$scope.query = {
+				order: 'log_debut',
+				limit: 15,
+				page: 1
+			};
+			$scope.affdate = function(debut) {
+				var temp = new Date(debut);
+				var date = temp.getDate();
+				var month = temp.getMonth()+1;
+				var year = temp.getFullYear();
+				if (date.toString().length == 1) {
+					date = "0"+date;
+				}
+				if (month.toString().length == 1) {
+				  month = "0"+month;
+				}
+				var hour = temp.getHours();
+				var minute = temp.getMinutes();
+				var second = temp.getSeconds();
+				if (hour.toString().length == 1) {
+				  hour = "0"+hour;
+				}
+				if (minute.toString().length == 1) {
+				  minute = "0"+minute;
+				}
+				if (second.toString().length == 1) {
+				  second = "0"+second;
+				}
+				return date+"/"+month+"/"+year+" "+hour+":"+minute+":"+second;
+			};
+		}]);
+

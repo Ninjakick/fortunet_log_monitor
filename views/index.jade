@@ -1,0 +1,69 @@
+extends layout
+
+block content
+	div.container
+		canvas#myChart
+	script.
+		var data = '#{data}';
+		data = JSON.parse(data.replace(/&quot;/g, '"'));
+		window.onload = function() {
+			var canvas = document.getElementById('myChart');
+			var ctx = canvas.getContext('2d');
+			var myChart = new Chart(ctx, {
+				type: 'line',
+				data: {
+			   		labels: data.label,
+					datasets: [{
+						label: 'Sortant',
+						data: data.datasortant,
+						backgroundColor: "rgba(179, 11, 11,0.9)",
+						borderColor: "rgba(179, 11, 11,0.9)",
+						fill: false
+					},
+					{
+						label: 'Entrant',
+						data: data.dataentrant,
+						backgroundColor: "rgba(0, 153, 148,0.9)",
+						borderColor: "rgba(0, 153, 148,0.9)",
+						fill:false
+					}]
+				},
+				options:{
+					responsive: true,
+					tooltips: {
+						mode: 'index',
+						intersect: false,
+					},
+					hover: {
+						mode: 'nearest',
+						intersect: true
+					},
+					title: {
+						display: true,
+						text: "Consomation data connexion"
+					},
+					scales: {
+						xAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: 'Date'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: 'Value (GB)'
+							}
+						}]
+					},
+					legend: {
+						display: true,
+						position: 'right',
+					},
+				}
+			});
+		}
+		
+

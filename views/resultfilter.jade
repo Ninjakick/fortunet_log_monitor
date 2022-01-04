@@ -1,0 +1,110 @@
+extends entete
+
+block content
+	div(class="container-fluid")
+		div(class="row")
+			main(class="page-content col-12 mt-4")
+				div(class="container-fluid")
+				h2 TABLEAU DE BORD
+				hr
+				div(class="col-12 p-0")
+					div(class="card-header text-uppercase",style="background-color: #343A40; color: white;")
+						div(class="col-6") Consomation de donné
+					div(class="card-body")
+						div(class="col-12")
+							form(method="get", action="/users/filter")
+								div(class="row")
+									div(class="col-3")
+										label Rosage
+										input(class="form-control", name="srcname", type="text",required)
+									div(class="col-6")
+										div(class="row")
+											div(class="col")
+												label date
+												input(class="form-control", name="datedebut", required, type="text", id="dateini")
+											div(class="col")
+												label
+													br
+												input(class="form-control", name="datefin", required, type="text", id="datefini")
+									div(class="col-3")
+										label
+											br
+										button(class="btn btn-block btn-primary") Filtrer
+						div(class="col-12")
+							canvas#myChart
+	script.
+		$(document).ready(function(){
+			$("#dateini" ).datetimepicker({
+				format:'Y-m-d H:i',
+				lang:'fr',
+				theme:'dark'
+			});
+			$( "#datefini" ).datetimepicker({
+				format:'Y-m-d H:i',
+				lang:'fr',
+				theme:'dark'                   
+			});
+		});		
+		var data = '#{data}';
+		data = JSON.parse(data.replace(/&quot;/g, '"'));
+		window.onload = function() {
+			var canvas = document.getElementById('myChart');
+			var ctx = canvas.getContext('2d');
+			var myChart = new Chart(ctx, {
+				type: 'line',
+				data: {
+			   		labels: data.label,
+					datasets: [{
+						label: 'Sortant',
+						data: data.datasortant,
+						backgroundColor: "rgba(179, 11, 11,0.9)",
+						borderColor: "rgba(179, 11, 11,0.9)",
+						fill: false
+					},
+					{
+						label: 'Entrant',
+						data: data.dataentrant,
+						backgroundColor: "rgba(0, 153, 148,0.9)",
+						borderColor: "rgba(0, 153, 148,0.9)",
+						fill:false
+					}]
+				},
+				options:{
+					responsive: true,
+					tooltips: {
+						mode: 'index',
+						intersect: false,
+					},
+					hover: {
+						mode: 'nearest',
+						intersect: true
+					},
+					title: {
+						display: true,
+						text: ""
+					},
+					scales: {
+						xAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: 'Date'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: 'Value (GB)'
+							}
+						}]
+					},
+					legend: {
+						display: true,
+						position: 'right',
+					},
+				}
+			});
+		}
+		
+
